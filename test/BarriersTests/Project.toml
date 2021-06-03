@@ -1,0 +1,12 @@
+name = "BarriersTests"
+uuid = "30b19830-ec1d-44bd-9a9e-56cf7b6f1113"
+authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+Barriers = "30f38c71-d88d-4142-b3b6-315c782449b9"
+BarriersBenchmarks = "88a1baa9-3b75-4e29-b646-dc49bc20cac1"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+julia = "1"

@@ -3,11 +3,18 @@ uuid = "30f38c71-d88d-4142-b3b6-315c782449b9"
 authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+RecordArrays = "f09397d6-3230-428f-8b46-6217caaab93c"
+
 [compat]
-julia = "1"
+julia = "1.5"
 
 [extras]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [targets]
-test = ["Test"]
+test = ["BenchmarkTools", "LinearAlgebra", "Test", "UnPack"]
