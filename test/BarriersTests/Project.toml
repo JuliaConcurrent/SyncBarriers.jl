@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 Barriers = "30f38c71-d88d-4142-b3b6-315c782449b9"
 BarriersBenchmarks = "88a1baa9-3b75-4e29-b646-dc49bc20cac1"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
