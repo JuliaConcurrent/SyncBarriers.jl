@@ -121,7 +121,7 @@ function _reduce_arrive!(
     value,
     ::Val{ShouldWait},
     spin = nothing,
-) where {_F,NBranches,T,ShouldWait}
+) where {NBranches,T,ShouldWait}
     value = convert(T, value)
     barrier = handle.barrier
     i = handle.i
