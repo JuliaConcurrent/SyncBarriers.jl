@@ -9,5 +9,5 @@ makedocs(
 
 deploydocs(
     repo = "github.com/tkf/Barriers.jl",
-    # push_preview = true,
+    push_preview = true,
 )
