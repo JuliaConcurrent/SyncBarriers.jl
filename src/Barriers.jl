@@ -6,7 +6,6 @@ export
     CentralizedBarrier,
     DisseminationBarrier,
     FlatTreeBarrier,
-    FuzzyBarrier,
     StaticTreeBarrier,
     TreeBarrier,
     # Functions:
@@ -57,5 +56,7 @@ include("flat_tree_barrier.jl")
 include("barrier_api.jl")
 
 end  # module Internal
+
+Internal.define_docstrings()
 
 end  # baremodule Barriers
