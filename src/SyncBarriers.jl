@@ -1,4 +1,4 @@
-baremodule Barriers
+baremodule SyncBarriers
 
 export
     # Types:
@@ -43,7 +43,7 @@ module Internal
 using ArgCheck: ArgCheck, @argcheck, @check
 using RecordArrays
 
-using ..Barriers: Barriers
+using ..SyncBarriers: SyncBarriers
 
 include("utils.jl")
 include("oneway.jl")
@@ -59,4 +59,4 @@ end  # module Internal
 
 Internal.define_docstrings()
 
-end  # baremodule Barriers
+end  # baremodule SyncBarriers

@@ -1,9 +1,9 @@
 # Default barriers:
-Barriers.Barrier(n::Integer) = _Barrier(n, Threads.nthreads())
-Barriers.fuzzy_barrier(n::Integer) = _fuzzy_barrier(n, Threads.nthreads())
-Barriers.fuzzy_reduce_barrier(op, ::Type{T}, n::Integer) where {T} =
+SyncBarriers.Barrier(n::Integer) = _Barrier(n, Threads.nthreads())
+SyncBarriers.fuzzy_barrier(n::Integer) = _fuzzy_barrier(n, Threads.nthreads())
+SyncBarriers.fuzzy_reduce_barrier(op, ::Type{T}, n::Integer) where {T} =
     _fuzzy_reduce_barrier(op, T, n, Threads.nthreads())
-Barriers.reduce_barrier(op, ::Type{T}, n::Integer) where {T} =
+SyncBarriers.reduce_barrier(op, ::Type{T}, n::Integer) where {T} =
     _reduce_barrier(op, T, n, Threads.nthreads())
 
 # TODO: find the best cutoff
@@ -46,16 +46,16 @@ function _reduce_barrier(op, ::Type{T}, n::Integer, nthreads::Integer) where {T}
     end
 end
 
-Barriers.CentralizedBarrier(n) = CentralizedBarrier(n)
-Barriers.DisseminationBarrier(n) = DisseminationBarrier(n)
-Barriers.StaticTreeBarrier{NArrive,NDepart}(n) where {NArrive,NDepart} =
+SyncBarriers.CentralizedBarrier(n) = CentralizedBarrier(n)
+SyncBarriers.DisseminationBarrier(n) = DisseminationBarrier(n)
+SyncBarriers.StaticTreeBarrier{NArrive,NDepart}(n) where {NArrive,NDepart} =
     StaticTreeBarrier{NArrive,NDepart}(n)
-Barriers.StaticTreeBarrier{NArrive,NDepart,T}(op, n) where {NArrive,NDepart,T} =
+SyncBarriers.StaticTreeBarrier{NArrive,NDepart,T}(op, n) where {NArrive,NDepart,T} =
     StaticTreeBarrier{NArrive,NDepart,T}(op, n)
-Barriers.TreeBarrier{N}(n) where {N} = TreeBarrier{N}(n)
-Barriers.TreeBarrier{N,T}(op, n) where {N,T} = TreeBarrier{N,T}(op, n)
-Barriers.FlatTreeBarrier{N}(n) where {N} = FlatTreeBarrier{N}(n)
-Barriers.FlatTreeBarrier{N,T}(op, n) where {N,T} = FlatTreeBarrier{N,T}(op, n)
+SyncBarriers.TreeBarrier{N}(n) where {N} = TreeBarrier{N}(n)
+SyncBarriers.TreeBarrier{N,T}(op, n) where {N,T} = TreeBarrier{N,T}(op, n)
+SyncBarriers.FlatTreeBarrier{N}(n) where {N} = FlatTreeBarrier{N}(n)
+SyncBarriers.FlatTreeBarrier{N,T}(op, n) where {N,T} = FlatTreeBarrier{N,T}(op, n)
 
 const FuzzyReduceBarrier{T,NBranches} =
     Union{TreeBarrier{NBranches,T},FlatTreeBarrier{NBranches,T}}
@@ -65,29 +65,29 @@ const FuzzyBarrier = Union{CentralizedBarrier,TreeBarrier,FlatTreeBarrier}
 const ReduceBarrier{T} =
     Union{TreeBarrier{<:Any,T},FlatTreeBarrier{<:Any,T},StaticTreeBarrier{<:Any,<:Any,T}}
 acctype(::Type{B}) where {T,B<:ReduceBarrier{T}} = T
-acctype(b::Barriers.Barrier) = acctype(typeof(b))
+acctype(b::SyncBarriers.Barrier) = acctype(typeof(b))
 
-function Barriers.cycle!(
+function SyncBarriers.cycle!(
     handle::BarrierHandle{<:FuzzyBarrier},
     spin::Union{Integer,Nothing} = nothing,
 )
-    islast = Barriers.arrive!(handle)
-    islast || Barriers.depart!(handle, spin)
+    islast = SyncBarriers.arrive!(handle)
+    islast || SyncBarriers.depart!(handle, spin)
     return islast
 end
 
-Barriers.arrive!(handle::BarrierHandle{<:FuzzyReduceBarrier{Nothing}}) =
-    Barriers.reduce_arrive!(handle, nothing) === Some(nothing)
+SyncBarriers.arrive!(handle::BarrierHandle{<:FuzzyReduceBarrier{Nothing}}) =
+    SyncBarriers.reduce_arrive!(handle, nothing) === Some(nothing)
 
-Base.summary(io::IO, ::CentralizedBarrier) = show(io, Barriers.CentralizedBarrier)
-Base.summary(io::IO, ::DisseminationBarrier) = show(io, Barriers.DisseminationBarrier)
+Base.summary(io::IO, ::CentralizedBarrier) = show(io, SyncBarriers.CentralizedBarrier)
+Base.summary(io::IO, ::DisseminationBarrier) = show(io, SyncBarriers.DisseminationBarrier)
 Base.summary(io::IO, ::StaticTreeBarrier{NArrive,NDepart,T}) where {NArrive,NDepart,T} =
-    show(io, Barriers.StaticTreeBarrier{NArrive,NDepart,T})
-Base.summary(io::IO, ::TreeBarrier{T,N}) where {T,N} = show(io, Barriers.TreeBarrier{T,N})
+    show(io, SyncBarriers.StaticTreeBarrier{NArrive,NDepart,T})
+Base.summary(io::IO, ::TreeBarrier{T,N}) where {T,N} = show(io, SyncBarriers.TreeBarrier{T,N})
 Base.summary(io::IO, ::FlatTreeBarrier{T,N}) where {T,N} =
-    show(io, Barriers.FlatTreeBarrier{T,N})
+    show(io, SyncBarriers.FlatTreeBarrier{T,N})
 
-function Base.show(io::IO, ::MIME"text/plain", barrier::Barriers.Barrier)
+function Base.show(io::IO, ::MIME"text/plain", barrier::SyncBarriers.Barrier)
     summary(io, barrier)
     print(io, " for ", length(barrier), " task(s)")
 end

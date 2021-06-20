@@ -14,7 +14,7 @@ See [`fuzzy_barrier`](@ref), [`depart!`](@ref).
 # Examples
 
 ```julia
-julia> using Barriers
+julia> using SyncBarriers
 
 julia> xs = [1:3;];
 

@@ -1,4 +1,4 @@
-module BarriersTests
+module SyncBarriersTests
 
 using Test
 
@@ -44,4 +44,4 @@ function runtests(modules = collect_modules())
     end
 end
 
-end  # module BarriersTests
+end  # module SyncBarriersTests

@@ -1,12 +1,12 @@
     reduce!(barrier[i], xᵢ::T) -> acc::T
 
 Using a reduce barrier `barrier` (created, e.g., by [`reduce_barrier(⊗, T,
-n)`](@ref Barriers.reduce_barrier)), it computes `acc = x₁ ⊗ x₂ ⊗ ⋯ ⊗ xₙ`.
+n)`](@ref SyncBarriers.reduce_barrier)), it computes `acc = x₁ ⊗ x₂ ⊗ ⋯ ⊗ xₙ`.
 
 # Examples
 
 ```julia
-julia> using Barriers
+julia> using SyncBarriers
 
 julia> xs = Float64[1:4;];
 

@@ -1,19 +1,19 @@
-module TestBarriers
+module TestSyncBarriers
 
 using Test
-using Barriers
-using Barriers: Internal
+using SyncBarriers
+using SyncBarriers: Internal
 
 function test_barrier()
     barrier_factories = [
-        Barriers.CentralizedBarrier,
-        Barriers.DisseminationBarrier,
-        Barriers.TreeBarrier{2},
-        Barriers.TreeBarrier{3},
-        Barriers.FlatTreeBarrier{2},
-        Barriers.FlatTreeBarrier{3},
-        Barriers.StaticTreeBarrier{4,2},
-        Barriers.StaticTreeBarrier{5,3},
+        SyncBarriers.CentralizedBarrier,
+        SyncBarriers.DisseminationBarrier,
+        SyncBarriers.TreeBarrier{2},
+        SyncBarriers.TreeBarrier{3},
+        SyncBarriers.FlatTreeBarrier{2},
+        SyncBarriers.FlatTreeBarrier{3},
+        SyncBarriers.StaticTreeBarrier{4,2},
+        SyncBarriers.StaticTreeBarrier{5,3},
         # ...
     ]
     ntasks_list = unique([1, 2, Threads.nthreads(), 2 * Threads.nthreads()])
@@ -40,13 +40,13 @@ function use_barrier(factory, ntasks; kwargs...)
     return use_barrier(barrier; kwargs...)
 end
 
-function use_barrier(barrier::Barriers.Barrier; ncycles = 1000)
+function use_barrier(barrier::SyncBarriers.Barrier; ncycles = 1000)
     ntasks = length(barrier)
     states = zeros(Int, ncycles, ntasks)
     return use_barrier!(states, barrier)
 end
 
-function use_barrier!(states::Matrix, barrier::Barriers.Barrier, spin = nothing)
+function use_barrier!(states::Matrix, barrier::SyncBarriers.Barrier, spin = nothing)
     ncycles, ntasks = size(states)
     @assert ntasks == length(barrier)
     value = Threads.Atomic{Int}(0)
@@ -54,9 +54,9 @@ function use_barrier!(states::Matrix, barrier::Barriers.Barrier, spin = nothing)
         Threads.@spawn try
             for k in 1:ncycles
                 Threads.atomic_add!(value, 1)
-                Barriers.cycle!(barrier[i], spin)
+                SyncBarriers.cycle!(barrier[i], spin)
                 states[k, i] = value[]
-                Barriers.cycle!(barrier[i], spin)
+                SyncBarriers.cycle!(barrier[i], spin)
             end
         catch err
             @error(
@@ -73,23 +73,23 @@ function use_barrier!(states::Matrix, barrier::Barriers.Barrier, spin = nothing)
 end
 
 function test_default_barriers()
-    @test Barriers.Barrier(2) isa Barriers.CentralizedBarrier
-    @test Barriers.fuzzy_barrier(2) isa Barriers.CentralizedBarrier
-    @test Barriers.fuzzy_reduce_barrier(+, Int, 2) isa Barriers.FlatTreeBarrier{2,Int}
-    @test Barriers.reduce_barrier(+, Int, 2) isa Barriers.FlatTreeBarrier{2,Int}
+    @test SyncBarriers.Barrier(2) isa SyncBarriers.CentralizedBarrier
+    @test SyncBarriers.fuzzy_barrier(2) isa SyncBarriers.CentralizedBarrier
+    @test SyncBarriers.fuzzy_reduce_barrier(+, Int, 2) isa SyncBarriers.FlatTreeBarrier{2,Int}
+    @test SyncBarriers.reduce_barrier(+, Int, 2) isa SyncBarriers.FlatTreeBarrier{2,Int}
 
-    @test Barriers.Barrier(32) isa Barriers.Barrier
-    @test Barriers.fuzzy_barrier(32) isa Barriers.Barrier
-    @test Barriers.fuzzy_reduce_barrier(+, Int, 32) isa Barriers.Barrier
-    @test Barriers.reduce_barrier(+, Int, 32) isa Barriers.Barrier
+    @test SyncBarriers.Barrier(32) isa SyncBarriers.Barrier
+    @test SyncBarriers.fuzzy_barrier(32) isa SyncBarriers.Barrier
+    @test SyncBarriers.fuzzy_reduce_barrier(+, Int, 32) isa SyncBarriers.Barrier
+    @test SyncBarriers.reduce_barrier(+, Int, 32) isa SyncBarriers.Barrier
 end
 
 function test_default_barriers_internal()
     @testset for n in 1:32, nthreads in 1:32
-        @test Internal._Barrier(n, nthreads) isa Barriers.Barrier
-        @test Internal._fuzzy_barrier(n, nthreads) isa Barriers.Barrier
-        @test Internal._fuzzy_reduce_barrier(+, Int, n, nthreads) isa Barriers.Barrier
-        @test Internal._reduce_barrier(+, Int, n, nthreads) isa Barriers.Barrier
+        @test Internal._Barrier(n, nthreads) isa SyncBarriers.Barrier
+        @test Internal._fuzzy_barrier(n, nthreads) isa SyncBarriers.Barrier
+        @test Internal._fuzzy_reduce_barrier(+, Int, n, nthreads) isa SyncBarriers.Barrier
+        @test Internal._reduce_barrier(+, Int, n, nthreads) isa SyncBarriers.Barrier
     end
 end
 

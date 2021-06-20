@@ -25,7 +25,7 @@ function Node{NBranches,T}() where {NBranches,T}
     )
 end
 
-struct TreeBarrier{NBranches,T,Op,Values} <: Barriers.TreeBarrier{NBranches,T}
+struct TreeBarrier{NBranches,T,Op,Values} <: SyncBarriers.TreeBarrier{NBranches,T}
     n::Int
     local_sense::Vector{Bool}  # TODO: pad
     nodes::Vector{Node{NBranches,T,Values}}
@@ -183,7 +183,7 @@ function _reduce_arrive!(
     end
 end
 
-function Barriers.reduce!(
+function SyncBarriers.reduce!(
     handle::BarrierHandle{<:TreeBarrier{NBranches,T}},
     value,
     spin::Union{Nothing,Integer} = nothing,
@@ -199,7 +199,7 @@ function Barriers.reduce!(
     end
 end
 
-function Barriers.reduce_arrive!(
+function SyncBarriers.reduce_arrive!(
     handle::BarrierHandle{<:TreeBarrier{NBranches,T}},
     value,
 ) where {NBranches,T}
@@ -211,7 +211,7 @@ function Barriers.reduce_arrive!(
     end
 end
 
-function Barriers.depart!(
+function SyncBarriers.depart!(
     handle::BarrierHandle{<:TreeBarrier{NBranches}},
     spin::Union{Integer,Nothing} = nothing,
 ) where {NBranches}

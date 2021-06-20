@@ -1,7 +1,7 @@
 module BenchFuzzy
 
 import LinearAlgebra
-using Barriers
+using SyncBarriers
 using BenchmarkTools
 using UnPack: @unpack
 

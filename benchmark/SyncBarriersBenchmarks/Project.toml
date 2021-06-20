@@ -1,10 +1,10 @@
-name = "BarriersBenchmarks"
-uuid = "88a1baa9-3b75-4e29-b646-dc49bc20cac1"
+name = "SyncBarriersBenchmarks"
+uuid = "72ebdf5a-2200-4ea8-af32-0d16f67d4260"
 authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
-Barriers = "30f38c71-d88d-4142-b3b6-315c782449b9"
+SyncBarriers = "3986aa12-c984-439b-887a-f8545bea0e93"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"

@@ -1,4 +1,4 @@
-module BarriersBenchmarks
+module SyncBarriersBenchmarks
 
 using BenchmarkTools: Benchmark, BenchmarkGroup
 
@@ -49,4 +49,4 @@ function clear()
     BenchGCM.clear()
 end
 
-end  # module BarriersBenchmarks
+end  # module SyncBarriersBenchmarks

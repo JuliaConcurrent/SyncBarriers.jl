@@ -1,7 +1,7 @@
 module TestUtils
 
 using Test
-using Barriers.Internal: ceillog2
+using SyncBarriers.Internal: ceillog2
 
 function test_ceillog2()
     xs = 1:2^10

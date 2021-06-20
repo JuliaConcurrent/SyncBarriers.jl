@@ -1,13 +1,13 @@
 using Documenter
-using Barriers
+using SyncBarriers
 
 makedocs(
-    sitename = "Barriers",
+    sitename = "SyncBarriers",
     format = Documenter.HTML(),
-    modules = [Barriers]
+    modules = [SyncBarriers]
 )
 
 deploydocs(
-    repo = "github.com/tkf/Barriers.jl",
+    repo = "github.com/tkf/SyncBarriers.jl",
     push_preview = true,
 )

@@ -1,7 +1,7 @@
-# Barriers.jl
+# SyncBarriers.jl
 
 ```@docs
-Barriers
+SyncBarriers
 ```
 
 ## Barrier factories

@@ -1,11 +1,11 @@
-struct BarrierHandle{Barrier<:Barriers.Barrier}
+struct BarrierHandle{Barrier<:SyncBarriers.Barrier}
     barrier::Barrier
     i::Int
 end
 
-Base.length(barrier::Barriers.Barrier) = barrier.n
+Base.length(barrier::SyncBarriers.Barrier) = barrier.n
 
-@inline function Base.getindex(barrier::Barriers.Barrier, i::Integer)
+@inline function Base.getindex(barrier::SyncBarriers.Barrier, i::Integer)
     @boundscheck 1 <= i <= length(barrier) || throw(BoundsError(barrier, i))
     return BarrierHandle(barrier, i)
 end

@@ -1,15 +1,15 @@
     reduce_arrive!(barrier[i], xᵢ::T)
 
 Using a fuzzy reduce barrier `barrier` (created, e.g., by
-[`fuzzy_reduce_barrier(op, T, ntasks)`](@ref Barriers.fuzzy_reduce_barrier)), it
+[`fuzzy_reduce_barrier(op, T, ntasks)`](@ref SyncBarriers.fuzzy_reduce_barrier)), it
 initiates the reduction across tasks. The result of the reduction can be
-retrieved by a call to [`depart!(barrier[i])`](@ref Barriers.depart!) once all
+retrieved by a call to [`depart!(barrier[i])`](@ref SyncBarriers.depart!) once all
 tasks have called `reduce_arrive!`.
 
 # Examples
 
 ```julia
-julia> using Barriers
+julia> using SyncBarriers
 
 julia> xs = Float64[1:4;];
 

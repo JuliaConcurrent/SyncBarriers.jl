@@ -21,7 +21,7 @@ function concrete(::Type{StaticFlagNode{NBranches,T}}) where {NBranches,T}
 end
 
 struct StaticTreeBarrier{NArrive,NDepart,T,Value,Op} <:
-       Barriers.StaticTreeBarrier{NArrive,NDepart,T}
+       SyncBarriers.StaticTreeBarrier{NArrive,NDepart,T}
     n::Int
     local_sense::Vector{Bool}  # TODO: pad
     arrives::Vector{StaticFlagNode{NArrive,T,Value}}
@@ -93,12 +93,12 @@ function foreach_child_flag(f::F, nodes, i) where {F}
     return
 end
 
-Barriers.cycle!(
+SyncBarriers.cycle!(
     handle::BarrierHandle{<:StaticTreeBarrier{<:Any,<:Any,Nothing}},
     spin::Union{Nothing,Integer} = nothing,
-) = Barriers.reduce!(handle, nothing, spin)
+) = SyncBarriers.reduce!(handle, nothing, spin)
 
-function Barriers.reduce!(
+function SyncBarriers.reduce!(
     handle::BarrierHandle{<:StaticTreeBarrier{<:Any,<:Any,T}},
     value,
     spin::Union{Nothing,Integer} = nothing,

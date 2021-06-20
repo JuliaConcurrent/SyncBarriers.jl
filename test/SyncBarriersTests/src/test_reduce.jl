@@ -1,8 +1,8 @@
 module TestReduce
 
 using Test
-using Barriers
-using Barriers.Internal: BarrierHandle, acctype
+using SyncBarriers
+using SyncBarriers.Internal: BarrierHandle, acctype
 
 # An example of non-commutative reduction
 function larger((i, a), (j, b))
@@ -32,33 +32,33 @@ function test_reduce()
     end
 end
 
-struct TreeBarrier′{NBranches,T,B<:Barriers.TreeBarrier{NBranches,T}} <: Barriers.Barrier
+struct TreeBarrier′{NBranches,T,B<:SyncBarriers.TreeBarrier{NBranches,T}} <: SyncBarriers.Barrier
     barrier::B
 end
 
 Base.length(barrier::TreeBarrier′) = length(barrier.barrier)
 
 TreeBarrier′{NBranches,T}(op, n) where {NBranches,T} =
-    TreeBarrier′(Barriers.TreeBarrier{NBranches,T}(op, n))
-Barriers.Internal.acctype(::Type{B}) where {T,B<:TreeBarrier′{<:Any,T}} = T
+    TreeBarrier′(SyncBarriers.TreeBarrier{NBranches,T}(op, n))
+SyncBarriers.Internal.acctype(::Type{B}) where {T,B<:TreeBarrier′{<:Any,T}} = T
 
-function Barriers.reduce!(
+function SyncBarriers.reduce!(
     handle::BarrierHandle{<:TreeBarrier′},
     value,
     spin::Union{Nothing,Integer} = nothing,
 )
     handle = BarrierHandle(handle.barrier.barrier, handle.i)
-    Barriers.reduce_arrive!(handle, value)
-    Barriers.depart!(handle, spin)
+    SyncBarriers.reduce_arrive!(handle, value)
+    SyncBarriers.depart!(handle, spin)
 end
 
 function test_reduce(op, T)
     barrier_factories = [
-        Barriers.StaticTreeBarrier{2,2,T},
-        Barriers.StaticTreeBarrier{3,4,T},
-        Barriers.TreeBarrier{3,T},
-        Barriers.FlatTreeBarrier{2,T},
-        Barriers.FlatTreeBarrier{3,T},
+        SyncBarriers.StaticTreeBarrier{2,2,T},
+        SyncBarriers.StaticTreeBarrier{3,4,T},
+        SyncBarriers.TreeBarrier{3,T},
+        SyncBarriers.FlatTreeBarrier{2,T},
+        SyncBarriers.FlatTreeBarrier{3,T},
         TreeBarrier′{2,T},
         TreeBarrier′{3,T},
         # ...
@@ -87,7 +87,7 @@ function use_barrier(op, factory, ntasks; kwargs...)
     return use_barrier(barrier; kwargs...)
 end
 
-function use_barrier(barrier::Barriers.Barrier; ncycles = 1000)
+function use_barrier(barrier::SyncBarriers.Barrier; ncycles = 1000)
     ntasks = length(barrier)
     input = rand(samples(acctype(barrier)), ncycles, ntasks)
     output = similar(input)
@@ -97,7 +97,7 @@ end
 function use_barrier!(
     output::Matrix,
     input::Matrix,
-    barrier::Barriers.Barrier,
+    barrier::SyncBarriers.Barrier,
     spin = nothing,
 )
     ncycles, ntasks = size(output)
@@ -105,7 +105,7 @@ function use_barrier!(
     @sync for i in 1:ntasks
         Threads.@spawn try
             for k in 1:ncycles
-                output[k, i] = Barriers.reduce!(barrier[i], input[k, i], spin)
+                output[k, i] = SyncBarriers.reduce!(barrier[i], input[k, i], spin)
             end
         catch err
             @error(

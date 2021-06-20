@@ -1,7 +1,7 @@
 module TestBenchSmoke
 
 using Test
-using BarriersBenchmarks: clear, setup_smoke
+using SyncBarriersBenchmarks: clear, setup_smoke
 
 function test_bench_smoke()
     try

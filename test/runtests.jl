@@ -1,2 +1,2 @@
 include("load.jl")
-BarriersTests.runtests()
+SyncBarriersTests.runtests()

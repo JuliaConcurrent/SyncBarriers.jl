@@ -1,6 +1,6 @@
 local_sense_states(n) = RecordArrays.fill(true, n; align = 64)
 
-struct CentralizedBarrier <: Barriers.CentralizedBarrier
+struct CentralizedBarrier <: SyncBarriers.CentralizedBarrier
     n::Int
     count::Threads.Atomic{Int}
     _count_pads::NTuple{ATOMICS_NPADS,Threads.Atomic{Int}}
@@ -33,7 +33,7 @@ end
     return barrier.waiters[handle.i, Int(s) + 1]
 end
 
-function Barriers.arrive!(handle::BarrierHandle{CentralizedBarrier})
+function SyncBarriers.arrive!(handle::BarrierHandle{CentralizedBarrier})
     barrier = handle.barrier
     s = !barrier.local_sense[handle.i]
     barrier.local_sense[handle.i] = s
@@ -51,7 +51,7 @@ function Barriers.arrive!(handle::BarrierHandle{CentralizedBarrier})
     end
 end
 
-function Barriers.depart!(
+function SyncBarriers.depart!(
     handle::BarrierHandle{CentralizedBarrier},
     spin::Union{Integer,Nothing} = nothing,
 )

@@ -1,7 +1,7 @@
     Barrier(ntasks::Integer) -> barrier
 
 Create a barrier for `ntasks` tasks.  Call [`cycle!(barrier[i])`](@ref
-Barriers.cycle!) in the `i`-th task for waiting for other tasks to arrive at the
+SyncBarriers.cycle!) in the `i`-th task for waiting for other tasks to arrive at the
 same phase.
 
 The actual returned concrete type is not the part of API. It is

@@ -1,5 +1,5 @@
-name = "Barriers"
-uuid = "30f38c71-d88d-4142-b3b6-315c782449b9"
+name = "SyncBarriers"
+uuid = "3986aa12-c984-439b-887a-f8545bea0e93"
 authors = ["Takafumi Arakaki <aka.tkf@gmail.com> and contributors"]
 version = "0.1.0"
 

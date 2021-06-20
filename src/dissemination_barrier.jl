@@ -1,6 +1,6 @@
 sense_parity_states(n) = RecordArrays.fill((sense = true, parity = 0), n; align = 64)
 
-struct DisseminationBarrier <: Barriers.DisseminationBarrier
+struct DisseminationBarrier <: SyncBarriers.DisseminationBarrier
     n::Int
     flags::Array{OneWayObservable{Bool},3}
     locals::typeof(sense_parity_states(1))
@@ -28,7 +28,7 @@ function prev_sense_parity(state)
     return ((parity == 1 ? !sense : sense), parity)
 end
 
-function Barriers.cycle!(
+function SyncBarriers.cycle!(
     handle::BarrierHandle{DisseminationBarrier},
     spin::Union{Nothing,Integer} = nothing,
 )

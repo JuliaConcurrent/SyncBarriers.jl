@@ -1,11 +1,11 @@
 module TestDoctest
 
-import Barriers
+import SyncBarriers
 using Documenter: doctest
 using Test
 
 function test()
-    doctest(Barriers)
+    doctest(SyncBarriers)
 end
 
 end  # module

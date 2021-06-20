@@ -1,16 +1,18 @@
-module BenchGCM
+module BenchCML
 
-using Barriers
+using SyncBarriers
 using BenchmarkTools
 
+function unsafe_update!(xs, t, indices, f, ϵ)
+    for i in indices
+        @inbounds xs[i, t+1] =
+            (1 - ϵ) * f(xs[i, t]) + ϵ / 2 * (f(xs[i-1, t]) + f(xs[i+1, t]))
+    end
+end
+
 function sim_seq!(xs, f::F, ϵ) where {F}
-    y = similar(xs, size(xs, 1))
     for t in firstindex(xs, 2):lastindex(xs, 2)-1
-        @views begin
-            @. y = f(xs[:, t])
-            m = sum(y) / size(xs, 1)
-            @. xs[:, t+1] = (1 - ϵ) * y + ϵ * m
-        end
+        unsafe_update!(xs, t, firstindex(xs, 1)+1:lastindex(xs, 1)-1, f, ϵ)
     end
 end
 
@@ -20,42 +22,36 @@ function sim_parallel!(xs, f, ϵ, barrier, foreach_parallel, spin)
     xchunks = collect(Iterators.partition(space, cld(length(space), ntasks)))
     foreach_parallel(1:ntasks) do itask
         local indices = xchunks[itask]
-        y = similar(xs, length(xchunks[itask]))
-        xl = @view xs[xchunks[itask], :]
         for t in firstindex(xs, 2):lastindex(xs, 2)-1
-            @views begin
-                @. y = f(xl[:, t])
-                s = reduce!(barrier[itask], sum(y), spin)
-                m = s / size(xs, 1)
-                @. xl[:, t+1] = (1 - ϵ) * y + ϵ * m
-            end
+            unsafe_update!(xs, t, indices, f, ϵ)
+            cycle!(barrier[itask], spin)
+        end
+    end
+end
+
+prepare_barriers(f, ntasks) = [f(2) for _ in 1:ntasks-1]
+
+function sim_parallel_edges!(xs, f, ϵ, barriers, foreach_parallel, spin)
+    ntasks = length(barriers)+1
+    space = firstindex(xs, 1)+1:lastindex(xs, 1)-1
+    xchunks = collect(Iterators.partition(space, cld(length(space), ntasks)))
+    foreach_parallel(1:ntasks) do itask
+        local indices = xchunks[itask]
+        for t in firstindex(xs, 2):lastindex(xs, 2)-1
+            unsafe_update!(xs, t, indices, f, ϵ)
+            itask == 1 || cycle!(barriers[itask-1][2], spin)
+            itask == ntasks || cycle!(barriers[itask][1], spin)
         end
     end
 end
 
 function sim_parallel_nobarrier!(xs, f, ϵ, ntasks, foreach_parallel)
     space = firstindex(xs, 1)+1:lastindex(xs, 1)-1
-    y = similar(xs, size(xs, 1))
-    sums = similar(xs, ntasks)
     xchunks = collect(Iterators.partition(space, cld(length(space), ntasks)))
-    foreach_parallel(1:ntasks) do itask
-        local indices = xchunks[itask]
-        xl = @view xs[xchunks[itask], :]
-        yl = @view y[xchunks[itask]]
-        @. yl = f(xl[:, begin])
-        sums[itask] = sum(y)
-    end
     for t in firstindex(xs, 2):lastindex(xs, 2)-1
-        m = sum(sums) / size(xs, 1)
         foreach_parallel(1:ntasks) do itask
             local indices = xchunks[itask]
-            xl = @view xs[xchunks[itask], :]
-            yl = @view y[xchunks[itask]]
-            @views begin
-                @. xl[:, t+1] = (1 - ϵ) * yl + ϵ * m
-                @. yl = f(xl[:, t+1])
-                sums[itask] = sum(yl)
-            end
+            unsafe_update!(xs, t, indices, f, ϵ)
         end
     end
 end
@@ -80,14 +76,14 @@ const CACHE = Ref{Any}(nothing)
 function setup(;
     spin = nothing,
     # spin = 1000,
+    nbranches = 2,
     ntasks = Threads.nthreads(),
-    nbranches = max(2, cld(ntasks, 4)),
     nsteps = 2^10,
     nsites = 2^13 * ntasks,
     a = 1.85,
     ϵ = 0.1,
 )
-    @debug "BenchGCM.setup: spin=$spin nbranches=$nbranches ntasks=$ntasks nsteps=$nsteps nsites=$nsites a=$a ϵ=$ϵ"
+    @debug "BenchCML.setup: spin=$spin nbranches=$nbranches ntasks=$ntasks nsteps=$nsteps nsites=$nsites a=$a ϵ=$ϵ"
 
     f(x) = 1 - a * x^2
 
@@ -99,9 +95,10 @@ function setup(;
     suite["seq"] = @benchmarkable sim_seq!(CACHE[], $f, $ϵ)
 
     for (label, barrier) in [
-        ("static-tree", StaticTreeBarrier{nbranches,nbranches,Float64}),
-        ("tree", TreeBarrier{nbranches,Float64}),
-        ("flat-tree", FlatTreeBarrier{nbranches,Float64}),
+        ("dissemination", DisseminationBarrier),
+        ("tree", TreeBarrier{nbranches}),
+        ("flat-tree", FlatTreeBarrier{nbranches}),
+        ("centralized", CentralizedBarrier),
         # ...
     ]
         s1 = suite[label] = BenchmarkGroup()
@@ -109,7 +106,7 @@ function setup(;
             CACHE[],
             $f,
             $ϵ,
-            $barrier(+, $ntasks),
+            $barrier($ntasks),
             parallel_foreach_static,
             $spin,
         )
@@ -117,7 +114,33 @@ function setup(;
             CACHE[],
             $f,
             $ϵ,
-            $barrier(+, $ntasks),
+            $barrier($ntasks),
+            parallel_foreach_static,
+            $spin,
+        )
+    end
+
+    for (label, barrier) in [
+        # ("dissemination-edges", DisseminationBarrier),
+        # ("tree-edges", TreeBarrier{nbranches}),
+        # ("flat-tree"-edges, FlatTreeBarrier{nbranches}),
+        ("centralized-edges", CentralizedBarrier),
+        # ...
+    ]
+        s1 = suite[label] = BenchmarkGroup()
+        s1["static"] = @benchmarkable sim_parallel_edges!(
+            CACHE[],
+            $f,
+            $ϵ,
+            prepare_barriers($barrier, $ntasks),
+            parallel_foreach_static,
+            $spin,
+        )
+        s1["dynamic"] = @benchmarkable sim_parallel_edges!(
+            CACHE[],
+            $f,
+            $ϵ,
+            prepare_barriers($barrier, $ntasks),
             parallel_foreach_static,
             $spin,
         )

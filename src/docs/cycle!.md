@@ -6,7 +6,7 @@ certain phase of the program and wait for other tasks to reach the same phase.
 # Examples
 
 ```julia
-julia> using Barriers
+julia> using SyncBarriers
 
 julia> xs = [1:3;];
 

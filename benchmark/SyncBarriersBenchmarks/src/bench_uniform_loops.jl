@@ -1,7 +1,7 @@
 module BenchUniformLoops
 
 using BenchmarkTools
-using Barriers
+using SyncBarriers
 
 function work()
     t1 = time_ns() + 100
@@ -42,18 +42,18 @@ end
 # bad idea?
 function spawn_and_barrier(ncycles, ntasks)
     tasks = Vector{Task}(undef, ntasks)
-    barrier = Barriers.CentralizedBarrier(ntasks + 1)
+    barrier = SyncBarriers.CentralizedBarrier(ntasks + 1)
     for k in 1:ncycles
         s = mod(k, 2^7) == 0
         s && empty!(tasks)
         for i in 1:ntasks
             t = Threads.@spawn begin
                 work()
-                Barriers.cycle!(barrier[i])
+                SyncBarriers.cycle!(barrier[i])
             end
             s && push!(tasks, t)
         end
-        Barriers.cycle!(barrier[ntasks+1])
+        SyncBarriers.cycle!(barrier[ntasks+1])
         s && foreach(wait, tasks)
     end
 end
@@ -64,7 +64,7 @@ function barrier_with_static(factory, ncycles, ntasks, spin)
     Threads.@threads :static for i in 1:ntasks
         for k in 1:ncycles
             work()
-            Barriers.cycle!(barrier[i], spin)
+            SyncBarriers.cycle!(barrier[i], spin)
         end
     end
 end
@@ -77,7 +77,7 @@ function barrier_with_spawn(factory, ncycles, ntasks, spin)
         t = Threads.@spawn begin
             for k in 1:ncycles
                 work()
-                Barriers.cycle!(barrier[i], spin)
+                SyncBarriers.cycle!(barrier[i], spin)
             end
         end
         push!(tasks, t)
@@ -95,27 +95,27 @@ function setup(;
 
     barrier_list = []
     push_barrier!(name, value) = push!(barrier_list, (name = name, value = value))
-    push_barrier!("dissemination", Barriers.DisseminationBarrier),
-    push_barrier!("centralized", Barriers.CentralizedBarrier),
+    push_barrier!("dissemination", SyncBarriers.DisseminationBarrier),
+    push_barrier!("centralized", SyncBarriers.CentralizedBarrier),
     if isempty(nbranches_list)
         if ntasks > 8
-            push_barrier!("tree-8", Barriers.TreeBarrier{8})
-            push_barrier!("flat-tree-8", Barriers.FlatTreeBarrier{8})
-            push_barrier!("static-tree-8-8", Barriers.StaticTreeBarrier{8,8})
+            push_barrier!("tree-8", SyncBarriers.TreeBarrier{8})
+            push_barrier!("flat-tree-8", SyncBarriers.FlatTreeBarrier{8})
+            push_barrier!("static-tree-8-8", SyncBarriers.StaticTreeBarrier{8,8})
         elseif ntasks > 4
-            push_barrier!("tree-4", Barriers.TreeBarrier{4})
-            push_barrier!("flat-tree-4", Barriers.FlatTreeBarrier{4})
-            push_barrier!("static-tree-4-4", Barriers.StaticTreeBarrier{4,4})
+            push_barrier!("tree-4", SyncBarriers.TreeBarrier{4})
+            push_barrier!("flat-tree-4", SyncBarriers.FlatTreeBarrier{4})
+            push_barrier!("static-tree-4-4", SyncBarriers.StaticTreeBarrier{4,4})
         elseif ntasks > 2
-            push_barrier!("tree-2", Barriers.TreeBarrier{2})
-            push_barrier!("flat-tree-2", Barriers.FlatTreeBarrier{2})
-            push_barrier!("static-tree-2-2", Barriers.StaticTreeBarrier{2,2})
+            push_barrier!("tree-2", SyncBarriers.TreeBarrier{2})
+            push_barrier!("flat-tree-2", SyncBarriers.FlatTreeBarrier{2})
+            push_barrier!("static-tree-2-2", SyncBarriers.StaticTreeBarrier{2,2})
         end
     else
         for n in nbranches_list
-            push_barrier!("tree-$n", Barriers.TreeBarrier{n})
-            push_barrier!("flat-tree-$n", Barriers.FlatTreeBarrier{n})
-            push_barrier!("static-tree-$n-$n", Barriers.StaticTreeBarrier{n,n})
+            push_barrier!("tree-$n", SyncBarriers.TreeBarrier{n})
+            push_barrier!("flat-tree-$n", SyncBarriers.FlatTreeBarrier{n})
+            push_barrier!("static-tree-$n-$n", SyncBarriers.StaticTreeBarrier{n,n})
         end
     end
 

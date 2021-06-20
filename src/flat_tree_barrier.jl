@@ -15,7 +15,7 @@ function FlatNode{NBranches,T}() where {NBranches,T}
     return FlatNode{NBranches,T,Values}(count, values)
 end
 
-struct FlatTreeBarrier{NBranches,T,Op,Values} <: Barriers.FlatTreeBarrier{NBranches,T}
+struct FlatTreeBarrier{NBranches,T,Op,Values} <: SyncBarriers.FlatTreeBarrier{NBranches,T}
     n::Int
     flags::Matrix{OneWayObservable{Bool}}
     locals::typeof(sense_parity_states(1))
@@ -44,13 +44,13 @@ function FlatTreeBarrier{NBranches,T}(op::Op, n::Integer) where {NBranches,T,Op}
     )::FlatTreeBarrier{NBranches,T,Op}
 end
 
-function Barriers.reduce!(
+function SyncBarriers.reduce!(
     handle::BarrierHandle{<:FlatTreeBarrier},
     value,
     spin::Union{Integer,Nothing} = nothing,
 )
-    acc1 = Barriers.reduce_arrive!(handle, value)
-    acc2 = Barriers.depart!(handle, spin)
+    acc1 = SyncBarriers.reduce_arrive!(handle, value)
+    acc2 = SyncBarriers.depart!(handle, spin)
     if acc1 isa Some
         @_assert acc2 === something(acc1)
         return something(acc1)
@@ -59,7 +59,7 @@ function Barriers.reduce!(
     end
 end
 
-function Barriers.reduce_arrive!(
+function SyncBarriers.reduce_arrive!(
     handle::BarrierHandle{<:FlatTreeBarrier{NBranches,T}},
     value,
 ) where {NBranches,T}
@@ -100,7 +100,7 @@ function Barriers.reduce_arrive!(
     end
 end
 
-function Barriers.depart!(
+function SyncBarriers.depart!(
     handle::BarrierHandle{<:FlatTreeBarrier},
     spin::Union{Integer,Nothing} = nothing,
 )
