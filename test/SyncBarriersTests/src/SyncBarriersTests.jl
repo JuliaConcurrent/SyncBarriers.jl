@@ -28,6 +28,10 @@ collect_modules() = collect_modules(@__MODULE__)
 
 function runtests(modules = collect_modules())
     @testset "$(nameof(m))" for m in modules
+        if m === TestDoctest && VERSION < v"1.6"
+            @info "Skip doctest in Julia $VERSION"
+            continue
+        end
         tests = map(names(m, all = true)) do n
             n == :test || startswith(string(n), "test_") || return nothing
             f = getproperty(m, n)
