@@ -8,6 +8,6 @@ makedocs(
 )
 
 deploydocs(
-    repo = "github.com/tkf/SyncBarriers.jl",
+    repo = "github.com/JuliaConcurrent/SyncBarriers.jl",
     push_preview = true,
 )

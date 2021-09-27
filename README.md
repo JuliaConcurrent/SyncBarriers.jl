@@ -1,6 +1,6 @@
 # SyncBarriers
 
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://tkf.github.io/SyncBarriers.jl/dev)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaconcurrent.github.io/SyncBarriers.jl/dev)
 
 SyncBarriers.jl provides various implementations of
 [barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science)) for shared
@@ -9,7 +9,7 @@ the cooperative multitasking nature of Julia's task system while allowing the
 programmers to express and leverage the structure of the parallelism in their
 program.
 
-See the [documentation](https://tkf.github.io/SyncBarriers.jl/dev) for more
+See the [documentation](https://juliaconcurrent.github.io/SyncBarriers.jl/dev) for more
 information.
 
 **Note:** Appropriate insertion of barriers for correct and efficient parallel
@@ -62,5 +62,5 @@ julia> @sync for i in 2:length(xs)-1
 ```
 
 See the
-[benchmarks](https://github.com/tkf/SyncBarriers.jl/tree/master/benchmark/SyncBarriersBenchmarks/src)
+[benchmarks](https://github.com/JuliaConcurrent/SyncBarriers.jl/tree/master/benchmark/SyncBarriersBenchmarks/src)
 for examples with actual performance considerations.
