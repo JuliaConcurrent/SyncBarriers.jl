@@ -33,6 +33,8 @@ function waitif(f, cond::OneWayCondition, spin::Union{Nothing,Integer})
     if spin isa Integer
         for _ in Base.OneTo(spin)
             f() || return
+            ccall(:jl_cpu_pause, Cvoid, ())
+            GC.safepoint()
         end
     end
     cond.task = current_task()
