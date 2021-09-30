@@ -20,8 +20,6 @@ macro _assert(args...)
     end |> esc
 end
 
-pause() = ccall(:jl_cpu_pause, Cvoid, ())
-
 function ceillog2(n::Integer)
     n > 0 || throw(DomainError(n))
     i = trailing_zeros(n)
