@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        julia-version: ['1.6', '1.5', 'nightly']
+        julia-version:
+          - '~1.7.0-beta4'
+          - '1.6'
+          - '1.5'
+          - 'nightly'
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
